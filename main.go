@@ -16,43 +16,80 @@ type MemoryCell struct {
 	Question *string
 }
 
+type MemoryCellOption func(*MemoryCell)
+
+func NewMemoryCell(options ...MemoryCellOption) *MemoryCell {
+	cell := &MemoryCell{}
+	for _, o := range options {
+		o(cell)
+	}
+	return cell
+}
+
+func UpdateMemoryCell(cell *MemoryCell, options ...MemoryCellOption) {
+	for _, o := range options {
+		o(cell)
+	}
+}
+
+func WithAnimal(animal string) MemoryCellOption {
+	return func(cell *MemoryCell) {
+		if animal != "" {
+			cell.Animal = &animal
+		} else {
+			cell.Animal = nil
+		}
+	}
+}
+
+func WithQuestion(question string) MemoryCellOption {
+	return func(cell *MemoryCell) {
+		if question != "" {
+			cell.Question = &question
+		} else {
+			cell.Question = nil
+		}
+	}
+}
+
+func WithYes(branch *MemoryCell) MemoryCellOption {
+	return func(cell *MemoryCell) {
+		cell.Yes = branch
+	}
+}
+
+func WithNo(branch *MemoryCell) MemoryCellOption {
+	return func(cell *MemoryCell) {
+		cell.No = branch
+	}
+}
+
 func initMemory() *MemoryCell {
-	stringPointer := func(s string) *string {
-		return &s
-	}
 
-	liveInTheWaterQuestion := MemoryCell{
-		Question: stringPointer("Does it live in the sea?"),
-	}
-	eatAntsQuestion := MemoryCell{
-		Question: stringPointer("Does it eat ants?"),
-	}
-	haveScaleArmourQuestion := MemoryCell{
-		Question: stringPointer("Is it scaly?"),
-	}
+	whaleAnswer := NewMemoryCell(WithAnimal("a whale"))
+	antAnswer := NewMemoryCell(WithAnimal("an ant"))
+	pangolinAnswer := NewMemoryCell(WithAnimal("a pangolin"))
+	blancMange := NewMemoryCell(WithAnimal("a blancmange"))
 
-	whaleAnswer := MemoryCell{
-		Animal: stringPointer("a whale"),
-	}
-	antAnswer := MemoryCell{
-		Animal: stringPointer("an ant"),
-	}
-	pangolinAnswer := MemoryCell{
-		Animal: stringPointer("a pangolin"),
-	}
-	blancMange := MemoryCell{
-		Animal: stringPointer("a blancmange"),
-	}
+	eatAntsQuestion := NewMemoryCell(
+		WithQuestion("Does it eat ants?"),
+		WithYes(pangolinAnswer),
+		WithNo(antAnswer),
+	)
 
-	liveInTheWaterQuestion.Yes = &whaleAnswer
-	liveInTheWaterQuestion.No = &haveScaleArmourQuestion
-	haveScaleArmourQuestion.Yes = &eatAntsQuestion
-	haveScaleArmourQuestion.No = &blancMange
+	haveScaleArmourQuestion := NewMemoryCell(
+		WithQuestion("Is it scaly?"),
+		WithYes(eatAntsQuestion),
+		WithNo(blancMange),
+	)
 
-	eatAntsQuestion.Yes = &pangolinAnswer
-	eatAntsQuestion.No = &antAnswer
+	liveInTheWaterQuestion := NewMemoryCell(
+		WithQuestion("Does it live in the sea?"),
+		WithYes(whaleAnswer),
+		WithNo(haveScaleArmourQuestion),
+	)
 
-	return &liveInTheWaterQuestion
+	return liveInTheWaterQuestion
 }
 
 func askQuestion(header string, question string) bool {
@@ -94,17 +131,23 @@ func addNewQuestion(cell *MemoryCell) {
 	oldAnimal := *cell
 
 	// replace current animal with the new question
-	newQuestion := cell
-	newQuestion.Animal = nil
-	newQuestion.Question = &question
 	if yes {
-		newQuestion.Yes = &newAnimal
-		newQuestion.No = &oldAnimal
+		UpdateMemoryCell(
+			cell,
+			WithAnimal(""),
+			WithQuestion(question),
+			WithYes(&newAnimal),
+			WithNo(&oldAnimal),
+		)
 	} else {
-		newQuestion.Yes = &oldAnimal
-		newQuestion.No = &newAnimal
+		UpdateMemoryCell(
+			cell,
+			WithAnimal(""),
+			WithQuestion(question),
+			WithYes(&oldAnimal),
+			WithNo(&newAnimal),
+		)
 	}
-
 }
 
 func main() {
