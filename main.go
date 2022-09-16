@@ -1,7 +1,5 @@
 package main
 
-// Don't run this into the playground: it won't work. Playground doesn't support reading from stdin.
-
 import (
 	"bufio"
 	"fmt"
@@ -70,8 +68,15 @@ func addNewQuestion(cell *MemoryCell) {
 }
 
 func main() {
+	thinkAnAnimal := func() {
+		fmt.Println("Think of an animal.")
+		fmt.Println("Press enter to continue.")
+		_ = readLine()
+	}
+
 	mem := InitAnimals()
 	cell := mem
+	thinkAnAnimal()
 	for true {
 
 		var yes bool
@@ -88,6 +93,7 @@ func main() {
 				fmt.Println("I thought as much")
 				if y := askQuestion("", "Do you want another go?"); y {
 					cell = mem
+					thinkAnAnimal()
 					continue
 				}
 				mem.Save("./pangolins.dat")
@@ -101,6 +107,7 @@ func main() {
 				fmt.Println("That fooled me.")
 				if y := askQuestion("", "Do you want another go?"); y {
 					cell = mem
+					thinkAnAnimal()
 					continue
 				}
 				mem.Save("./pangolins.dat")
