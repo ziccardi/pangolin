@@ -5,36 +5,59 @@ import (
 	"os"
 )
 
-type MemoryCell struct {
-	No       *MemoryCell
-	Yes      *MemoryCell
+type Cell struct {
+	No       *Cell
+	Yes      *Cell
 	Animal   *string
 	Question *string
 }
 
-func (cell *MemoryCell) Save(file string) {
+func (cell *Cell) Save(file string) {
 	b, _ := json.Marshal(cell)
 	_ = os.WriteFile(file, b, 0644)
 }
 
-type MemoryCellOption func(*MemoryCell)
+func (cell *Cell) AddNewAnimal(animal string, question string, answerYes bool) {
+	newAnimal := Cell{Animal: &animal}
+	oldAnimal := *cell
 
-func NewMemoryCell(options ...MemoryCellOption) *MemoryCell {
-	cell := &MemoryCell{}
+	if answerYes {
+		updateMemoryCell(
+			cell,
+			WithAnimal(""),
+			WithQuestion(question),
+			WithYes(&newAnimal),
+			WithNo(&oldAnimal),
+		)
+	} else {
+		updateMemoryCell(
+			cell,
+			WithAnimal(""),
+			WithQuestion(question),
+			WithYes(&oldAnimal),
+			WithNo(&newAnimal),
+		)
+	}
+}
+
+type CellOption func(*Cell)
+
+func NewMemoryCell(options ...CellOption) *Cell {
+	cell := &Cell{}
 	for _, o := range options {
 		o(cell)
 	}
 	return cell
 }
 
-func UpdateMemoryCell(cell *MemoryCell, options ...MemoryCellOption) {
+func updateMemoryCell(cell *Cell, options ...CellOption) {
 	for _, o := range options {
 		o(cell)
 	}
 }
 
-func WithAnimal(animal string) MemoryCellOption {
-	return func(cell *MemoryCell) {
+func WithAnimal(animal string) CellOption {
+	return func(cell *Cell) {
 		if animal != "" {
 			cell.Animal = &animal
 		} else {
@@ -43,8 +66,8 @@ func WithAnimal(animal string) MemoryCellOption {
 	}
 }
 
-func WithQuestion(question string) MemoryCellOption {
-	return func(cell *MemoryCell) {
+func WithQuestion(question string) CellOption {
+	return func(cell *Cell) {
 		if question != "" {
 			cell.Question = &question
 		} else {
@@ -53,14 +76,14 @@ func WithQuestion(question string) MemoryCellOption {
 	}
 }
 
-func WithYes(branch *MemoryCell) MemoryCellOption {
-	return func(cell *MemoryCell) {
+func WithYes(branch *Cell) CellOption {
+	return func(cell *Cell) {
 		cell.Yes = branch
 	}
 }
 
-func WithNo(branch *MemoryCell) MemoryCellOption {
-	return func(cell *MemoryCell) {
+func WithNo(branch *Cell) CellOption {
+	return func(cell *Cell) {
 		cell.Yes = branch
 	}
 }

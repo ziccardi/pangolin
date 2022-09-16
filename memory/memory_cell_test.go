@@ -11,7 +11,7 @@ const (
 	NO  = "NO"
 )
 
-func initMemory() *memory.MemoryCell {
+func initMemory() *memory.Cell {
 	whaleAnswer := memory.NewMemoryCell(memory.WithAnimal("a whale"))
 	antAnswer := memory.NewMemoryCell(memory.WithAnimal("an ant"))
 	pangolinAnswer := memory.NewMemoryCell(memory.WithAnimal("a pangolin"))

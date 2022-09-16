@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	. "pangolini/memory"
+	"pangolini/memory"
 	"strings"
 )
 
@@ -35,7 +35,7 @@ func askQuestion(header string, question string) bool {
 	return false
 }
 
-func addNewQuestion(cell *MemoryCell) {
+func addNewQuestion(cell *memory.Cell) {
 	fmt.Println("What is it then?")
 	animal := strings.ToLower(readLine())
 	fmt.Println("Tell me a question that distinguishes between")
@@ -46,27 +46,7 @@ func addNewQuestion(cell *MemoryCell) {
 
 	yes := askQuestion("What is the answer for", fmt.Sprintf(" %s?", animal))
 
-	newAnimal := MemoryCell{Animal: &animal}
-	oldAnimal := *cell
-
-	// replace current animal with the new question
-	if yes {
-		UpdateMemoryCell(
-			cell,
-			WithAnimal(""),
-			WithQuestion(question),
-			WithYes(&newAnimal),
-			WithNo(&oldAnimal),
-		)
-	} else {
-		UpdateMemoryCell(
-			cell,
-			WithAnimal(""),
-			WithQuestion(question),
-			WithYes(&oldAnimal),
-			WithNo(&newAnimal),
-		)
-	}
+	cell.AddNewAnimal(animal, question, yes)
 }
 
 func main() {
@@ -76,7 +56,7 @@ func main() {
 		_ = readLine()
 	}
 
-	mem := InitAnimals(memoryFile)
+	mem := memory.InitAnimals(memoryFile)
 	cell := mem
 	thinkAnAnimal()
 	for true {
