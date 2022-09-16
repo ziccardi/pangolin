@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+func readLine() string {
+	reader := bufio.NewReader(os.Stdin)
+	line, _ := reader.ReadString('\n')
+	return strings.TrimSuffix(line, "\n")
+}
+
 // initMemory - inits the bot memory with a few initial animals
 func initMemory() *MemoryCell {
 	whaleAnswer := NewMemoryCell(WithAnimal("a whale"))
@@ -44,9 +50,7 @@ func askQuestion(header string, question string) bool {
 			fmt.Println(header)
 		}
 		fmt.Println(question)
-		reader := bufio.NewReader(os.Stdin)
-		answer, _ := reader.ReadString('\n')
-		answer = strings.TrimSuffix(strings.ToLower(answer), "\n")
+		answer := readLine()
 		if answer == "y" || answer == "yes" {
 			return true
 		}
@@ -61,15 +65,12 @@ func askQuestion(header string, question string) bool {
 
 func addNewQuestion(cell *MemoryCell) {
 	fmt.Println("What is it then?")
-	reader := bufio.NewReader(os.Stdin)
-	animal, _ := reader.ReadString('\n')
-	animal = strings.TrimSuffix(strings.ToLower(animal), "\n")
+	animal := strings.ToLower(readLine())
 	fmt.Println("Tell me a question that distinguishes between")
 	fmt.Printf(" %s and\n", *cell.Animal)
 	fmt.Printf(" %s\n", animal)
 
-	question, _ := reader.ReadString('\n')
-	question = strings.TrimSuffix(question, "\n")
+	question := readLine()
 
 	yes := askQuestion("What is the answer for", fmt.Sprintf(" %s?", animal))
 
