@@ -6,8 +6,8 @@ import (
 )
 
 // InitAnimals - inits the bot memory with a few initial animals
-func InitAnimals() *MemoryCell {
-	d, err := os.ReadFile("./pangolins.dat")
+func InitAnimals(file string) *MemoryCell {
+	d, err := os.ReadFile(file)
 
 	if err == nil {
 		cell := &MemoryCell{}

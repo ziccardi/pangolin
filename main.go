@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const memoryFile = "pangolins.dat"
+
 func readLine() string {
 	reader := bufio.NewReader(os.Stdin)
 	line, _ := reader.ReadString('\n')
@@ -74,7 +76,7 @@ func main() {
 		_ = readLine()
 	}
 
-	mem := InitAnimals()
+	mem := InitAnimals(memoryFile)
 	cell := mem
 	thinkAnAnimal()
 	for true {
@@ -96,7 +98,7 @@ func main() {
 					thinkAnAnimal()
 					continue
 				}
-				mem.Save("./pangolins.dat")
+				mem.Save(memoryFile)
 				break
 			}
 			cell = cell.Yes
@@ -110,7 +112,7 @@ func main() {
 					thinkAnAnimal()
 					continue
 				}
-				mem.Save("./pangolins.dat")
+				mem.Save(memoryFile)
 				break
 			}
 			cell = cell.No
