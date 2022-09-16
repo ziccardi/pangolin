@@ -1,10 +1,20 @@
 package memory
 
+import (
+	"encoding/json"
+	"os"
+)
+
 type MemoryCell struct {
 	No       *MemoryCell
 	Yes      *MemoryCell
 	Animal   *string
 	Question *string
+}
+
+func (cell *MemoryCell) Save(file string) {
+	b, _ := json.Marshal(cell)
+	_ = os.WriteFile(file, b, 0644)
 }
 
 type MemoryCellOption func(*MemoryCell)
