@@ -16,34 +16,6 @@ func readLine() string {
 	return strings.TrimSuffix(line, "\n")
 }
 
-// initMemory - inits the bot memory with a few initial animals
-func initMemory() *MemoryCell {
-	whaleAnswer := NewMemoryCell(WithAnimal("a whale"))
-	antAnswer := NewMemoryCell(WithAnimal("an ant"))
-	pangolinAnswer := NewMemoryCell(WithAnimal("a pangolin"))
-	blancMange := NewMemoryCell(WithAnimal("a blancmange"))
-
-	eatAntsQuestion := NewMemoryCell(
-		WithQuestion("Does it eat ants?"),
-		WithYes(pangolinAnswer),
-		WithNo(antAnswer),
-	)
-
-	haveScaleArmourQuestion := NewMemoryCell(
-		WithQuestion("Is it scaly?"),
-		WithYes(eatAntsQuestion),
-		WithNo(blancMange),
-	)
-
-	liveInTheWaterQuestion := NewMemoryCell(
-		WithQuestion("Does it live in the sea?"),
-		WithYes(whaleAnswer),
-		WithNo(haveScaleArmourQuestion),
-	)
-
-	return liveInTheWaterQuestion
-}
-
 func askQuestion(header string, question string) bool {
 	for true {
 		if header != "" {
@@ -98,7 +70,7 @@ func addNewQuestion(cell *MemoryCell) {
 }
 
 func main() {
-	mem := initMemory()
+	mem := InitAnimals()
 	cell := mem
 	for true {
 
@@ -118,6 +90,7 @@ func main() {
 					cell = mem
 					continue
 				}
+				mem.Save("./pangolins.dat")
 				break
 			}
 			cell = cell.Yes
@@ -130,6 +103,7 @@ func main() {
 					cell = mem
 					continue
 				}
+				mem.Save("./pangolins.dat")
 				break
 			}
 			cell = cell.No
