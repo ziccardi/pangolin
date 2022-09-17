@@ -6,13 +6,13 @@ import (
 )
 
 // InitAnimals - inits the bot memory with a few initial animals
-func InitAnimals(file string) *Cell {
+func InitAnimals(file string) Cell {
 	d, err := os.ReadFile(file)
 
 	if err == nil {
-		cell := &Cell{}
-		err := json.Unmarshal(d, cell)
-		if err == nil {
+		cell := &cellImpl{}
+
+		if err := json.Unmarshal(d, cell); err == nil {
 			return cell
 		}
 	}

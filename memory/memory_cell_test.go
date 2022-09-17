@@ -3,6 +3,7 @@ package memory_test
 import (
 	"github.com/stretchr/testify/assert"
 	"pangolini/memory"
+	"pangolini/utils"
 	"testing"
 )
 
@@ -11,7 +12,7 @@ const (
 	NO  = "NO"
 )
 
-func initMemory() *memory.Cell {
+func initMemory() memory.Cell {
 	whaleAnswer := memory.NewMemoryCell(memory.WithAnimal("a whale"))
 	antAnswer := memory.NewMemoryCell(memory.WithAnimal("an ant"))
 	pangolinAnswer := memory.NewMemoryCell(memory.WithAnimal("a pangolin"))
@@ -40,7 +41,7 @@ func initMemory() *memory.Cell {
 
 func TestMemoryTree(t *testing.T) {
 	type args struct {
-		answers []string
+		answers []utils.Answer
 	}
 
 	tests := []struct {
@@ -52,7 +53,7 @@ func TestMemoryTree(t *testing.T) {
 		{
 			name: "Find whale",
 			args: args{
-				answers: []string{YES},
+				answers: []utils.Answer{YES},
 			},
 			wantQuestions: []string{"Does it live in the sea?"},
 			wantAnimal:    "a whale",
@@ -60,7 +61,7 @@ func TestMemoryTree(t *testing.T) {
 		{
 			name: "Find pangolin",
 			args: args{
-				answers: []string{NO, YES, YES},
+				answers: []utils.Answer{NO, YES, YES},
 			},
 			wantQuestions: []string{"Does it live in the sea?", "Is it scaly?", "Does it eat ants?"},
 			wantAnimal:    "a pangolin",
@@ -68,7 +69,7 @@ func TestMemoryTree(t *testing.T) {
 		{
 			name: "Find blancmange",
 			args: args{
-				answers: []string{NO, NO},
+				answers: []utils.Answer{NO, NO},
 			},
 			wantQuestions: []string{"Does it live in the sea?", "Is it scaly?"},
 			wantAnimal:    "a blancmange",
@@ -76,7 +77,7 @@ func TestMemoryTree(t *testing.T) {
 		{
 			name: "Find ant",
 			args: args{
-				answers: []string{NO, YES, NO},
+				answers: []utils.Answer{NO, YES, NO},
 			},
 			wantQuestions: []string{"Does it live in the sea?", "Is it scaly?", "Does it eat ants?"},
 			wantAnimal:    "an ant",
@@ -89,18 +90,14 @@ func TestMemoryTree(t *testing.T) {
 			var questions []string
 
 			for _, answer := range tt.args.answers {
-				if mem.Question != nil {
-					questions = append(questions, *mem.Question)
+				if !mem.IsLeaf() {
+					questions = append(questions, mem.GetData())
 				}
-				if answer == "YES" {
-					mem = mem.Yes
-				} else {
-					mem = mem.No
-				}
+				mem = mem.Next(answer)
 			}
 
 			assert.Equal(t, tt.wantQuestions, questions)
-			assert.Equal(t, tt.wantAnimal, *mem.Animal)
+			assert.Equal(t, tt.wantAnimal, mem.GetData())
 		})
 	}
 }

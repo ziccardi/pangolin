@@ -3,28 +3,53 @@ package memory
 import (
 	"encoding/json"
 	"os"
+	"pangolini/utils"
 )
 
-type Cell struct {
-	No       *Cell
-	Yes      *Cell
-	Animal   *string
-	Question *string
+type Cell interface {
+	IsLeaf() bool
+	GetData() string
+	AddNewAnimal(animal string, question string, answer utils.Answer)
+	Save(file string)
+	Next(answer utils.Answer) Cell
 }
 
-func (cell *Cell) Save(file string) {
+var _ Cell = &cellImpl{}
+
+type cellImpl struct {
+	NoBranch  *cellImpl
+	YesBranch *cellImpl
+	Data      string
+}
+
+func (cell *cellImpl) Next(answer utils.Answer) Cell {
+	if answer.IsYes() {
+		return cell.YesBranch
+	} else {
+		return cell.NoBranch
+	}
+}
+
+func (cell *cellImpl) IsLeaf() bool {
+	return cell.YesBranch == nil && cell.NoBranch == nil
+}
+
+func (cell *cellImpl) GetData() string {
+	return cell.Data
+}
+
+func (cell *cellImpl) Save(file string) {
 	b, _ := json.Marshal(cell)
 	_ = os.WriteFile(file, b, 0644)
 }
 
-func (cell *Cell) AddNewAnimal(animal string, question string, answerYes bool) {
-	newAnimal := Cell{Animal: &animal}
+func (cell *cellImpl) AddNewAnimal(animal string, question string, answer utils.Answer) {
+	newAnimal := cellImpl{Data: animal}
 	oldAnimal := *cell
 
-	if answerYes {
+	if answer.IsYes() {
 		updateMemoryCell(
 			cell,
-			WithAnimal(""),
 			WithQuestion(question),
 			WithYes(&newAnimal),
 			WithNo(&oldAnimal),
@@ -32,7 +57,6 @@ func (cell *Cell) AddNewAnimal(animal string, question string, answerYes bool) {
 	} else {
 		updateMemoryCell(
 			cell,
-			WithAnimal(""),
 			WithQuestion(question),
 			WithYes(&oldAnimal),
 			WithNo(&newAnimal),
@@ -40,50 +64,42 @@ func (cell *Cell) AddNewAnimal(animal string, question string, answerYes bool) {
 	}
 }
 
-type CellOption func(*Cell)
+type CellOption func(*cellImpl)
 
-func NewMemoryCell(options ...CellOption) *Cell {
-	cell := &Cell{}
+func NewMemoryCell(options ...CellOption) Cell {
+	cell := &cellImpl{}
 	for _, o := range options {
 		o(cell)
 	}
 	return cell
 }
 
-func updateMemoryCell(cell *Cell, options ...CellOption) {
+func updateMemoryCell(cell *cellImpl, options ...CellOption) {
 	for _, o := range options {
 		o(cell)
 	}
 }
 
 func WithAnimal(animal string) CellOption {
-	return func(cell *Cell) {
-		if animal != "" {
-			cell.Animal = &animal
-		} else {
-			cell.Animal = nil
-		}
+	return func(cell *cellImpl) {
+		cell.Data = animal
 	}
 }
 
 func WithQuestion(question string) CellOption {
-	return func(cell *Cell) {
-		if question != "" {
-			cell.Question = &question
-		} else {
-			cell.Question = nil
-		}
+	return func(cell *cellImpl) {
+		cell.Data = question
 	}
 }
 
-func WithYes(branch *Cell) CellOption {
-	return func(cell *Cell) {
-		cell.Yes = branch
+func WithYes(branch Cell) CellOption {
+	return func(cell *cellImpl) {
+		cell.YesBranch = branch.(*cellImpl)
 	}
 }
 
-func WithNo(branch *Cell) CellOption {
-	return func(cell *Cell) {
-		cell.No = branch
+func WithNo(branch Cell) CellOption {
+	return func(cell *cellImpl) {
+		cell.NoBranch = branch.(*cellImpl)
 	}
 }
